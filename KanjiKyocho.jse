@@ -1,0 +1,55 @@
+﻿// =================================================================================================
+// 漢字強調 html 作成マクロ
+// 選択範囲の漢字を強調した html を作成します
+//
+// 使い方       サクラエディタで新規ファイルを開く→漢字を強調したい文章を貼り付け
+//              →貼り付けた文章を全選択する
+//              →[ツール]→[登録済みマクロ]または[名前を指定してマクロを実行]を選ぶ
+//              →KanjiKyocho を実行する→貼り付けた文章が html に変換される
+//              →kanji.html を保存するダイアログが出るので、適当な場所に保存する
+//              →kanji.html を開き、ブラウザで漢字が強調された文章を確認する
+//
+// ご注意       半角英数字、半角記号、ひらがな、カタカナ、主な全角記号(作者の都合)以外を
+//              漢字とみなします。設定した文字以外が漢字判定されて強調される場合がありますので
+//              ご注意ください。強調させたくない文字がありましたら、var hiragana の内容を
+//              変更してみて下さい
+//
+//              変換したい文章の原本 txt を本マクロで変換すると、原本の文章が消えてしまいます
+//              新規ファイルに文章を張り付けてマクロで変換するようにして下さい
+//
+// v0.1         2023-10-17 (zxc05531)
+// =================================================================================================
+try
+{
+
+    var selectedStr = Editor.GetSelectedString(0);
+    if( selectedStr < 1 ){
+        var e = new Error(0, "文章を選択してください");
+        throw e;
+    }
+    
+    // 漢字だけ加工
+    var hiragana = "([^\s\w\!-\~あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわゐゑをんがぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽぁぃぅぇぉっゃゅょアイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヰヱヲンガギグゲゴザジズゼゾダヂヅデドバビブベボパピプペポァィゥェォッャュョヴ、。！？～「」『』・／｛｝＝＃＄％＆※：；＠＋ー＝【】♪（）〈〉＜＞…０１２３４５６７８９①②③④⑤⑥⑦⑧⑨〇●◎◇◆□■▽▼△▲☆★→↓↑←⇒⇔]+)";
+    var selectedStrReplace = selectedStr.replace(new RegExp(hiragana, "g"), "<span class=\"kanji\">" + "$1" + "</span>");
+    
+    // 改行を加工
+    selectedStrReplace = selectedStrReplace.replace(/\n/g, "<br>");
+
+    // html 作成
+    var output = "";
+    output = "<html><head><style>\r\n";
+    output = output + ".kanji {font-size: xx-large; margin-left: 10px; margin-right: 10px;}\r\n";
+    output = output + ".honbun {line-height: 2;}\r\n";
+    output = output + "</style>\r\n";
+    output = output + "</head><body><div class=\"honbun\">";
+    output = output + selectedStrReplace;
+    output = output + "</div></body></html>\r\n";
+    
+    // 保存
+    Editor.InsText(output)
+    Editor.FileSaveAsDialog("kanji.html", 3, 1);
+    
+
+} catch (e) {
+    Editor.InfoMsg("error: " + e.description);
+}
